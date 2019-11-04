@@ -151,7 +151,7 @@ def readFile(filename):
 
 
 def getOneMp3(filename):
-	channels, fs = readFileWav(filename)
+	channels, fs = readFile(filename)
 	channel_samples = channels[0]
 	# wsize = DEFAULT_WINDOW_SIZE
 	# wratio = DEFAULT_OVERLAP_RATIO

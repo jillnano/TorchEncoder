@@ -172,6 +172,19 @@ def predict_pb():
 		result = sess.run(encoder_op, feed_dict={X: total_X})
 	return result, filenameList
 
+def predict_data(total_X):
+	with open('torch_model.pb', 'rb') as f:
+		graph_def = tf.GraphDef()
+		graph_def.ParseFromString(f.read())
+	graph = tf.Graph()
+	with tf.Session(graph = graph) as sess:
+	# with graph.as_default():
+		tf.import_graph_def(graph_def, name='torch')
+		X = tf.get_default_graph().get_tensor_by_name('torch/input:0')
+		encoder_op = tf.get_default_graph().get_tensor_by_name('torch/encoder:0')
+		result = sess.run(encoder_op, feed_dict={X: total_X})
+	return result
+
 def test(idx):
 	ret, filenameList = predict_pb()
 	# ret, filenameList = predict()
