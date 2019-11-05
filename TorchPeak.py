@@ -172,7 +172,7 @@ def getSampleData(filename, savename, retStr = False):
 	# print(idx, filename)
 	data = getOneMp3(filename)
 	data = data.T
-	ret = {'filename': savename}
+	ret = {'mid': savename}
 	for k, v in enumerate(data):
 		ret['mean_%s'%k] = float(np.mean(v))
 		ret['std_%s'%k] = float(np.std(v))

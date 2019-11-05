@@ -13,8 +13,6 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.model_selection import train_test_split
 from tensorflow.python.platform import gfile
 
-import Utils
-
 def load_data():
 	return load_data_fft()
 	csv_data = pd.read_csv('data.csv', index_col = 0)
@@ -227,6 +225,7 @@ def preview():
 	plt.savefig('preview.jpg')
 
 def saveToSqlite():
+	import Utils
 	ret, filenameList = predict_pb()
 	ret = ret.T
 	X = ret[0] * 255
@@ -301,6 +300,7 @@ def saveToSqlite():
 	sqliteCursor.close()
 
 def test_temp():
+	import Utils
 	f = open('peak_data.json', 'r')
 	for i in f:
 		filename = json.loads(i)['filename']
