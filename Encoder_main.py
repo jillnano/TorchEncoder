@@ -21,7 +21,7 @@ if __name__ == '__main__':
 	# filename = [{'filename': '/mnt/d/__odyssey__/TorchEncoder/music/484249937.mp3', 'mid': '484249937'}]
 	sampleList = []
 	for idx, d in enumerate(filename):
-		print(idx, d['mid'])
+		print('sample:', idx, d['mid'])
 		if len(set(Order) - set(d.keys())) > 0:
 			sample = getSampleData(d['filename'], d['mid'])
 			s = copy.deepcopy(sample)
@@ -40,7 +40,7 @@ if __name__ == '__main__':
 	result = predict_data(total_X)
 	# result_data = []
 	for idx, fn in enumerate(filename):
-		print('encode:', fn['mid'])
+		print('encode:', idx, fn['mid'])
 		encode_data = {'encode_1': float(result[idx][0]), 'encode_2': float(result[idx][1])}
 		mongo.updateMusic(fn['mid'], encode_data)
 
