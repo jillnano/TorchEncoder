@@ -41,7 +41,7 @@ if __name__ == '__main__':
 	# result_data = []
 	for idx, fn in enumerate(filename):
 		print('encode:', idx, fn['mid'])
-		encode_data = {'encode_1': float(result[idx][0]), 'encode_2': float(result[idx][1])}
+		encode_data = {'encode_1': int(result[idx][0] * 255), 'encode_2': int(result[idx][1] * 255)}
 		mongo.updateMusic(fn['mid'], encode_data)
 
 	# 	result_data.append(fn)
