@@ -15,10 +15,8 @@ Order = ['mid', 'mean_0', 'std_0', 'max_0', 'min_0', 'mean_1', 'std_1', 'max_1',
 
 if __name__ == '__main__':
 	mongo = MongoUtils()
-	# playlist_id = sys.argv[1].strip()
-	playlist_id = '112545205'
+	playlist_id = sys.argv[1].strip()
 	filename = mongo.findMusicList(playlist_id)
-	# filename = [{'filename': '/mnt/d/__odyssey__/TorchEncoder/music/484249937.mp3', 'mid': '484249937'}]
 	sampleList = []
 	for idx, d in enumerate(filename):
 		print('sample:', idx, d['mid'])
