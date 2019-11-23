@@ -9,12 +9,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import sqlite3
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from copy import deepcopy
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, Normalizer
 from sklearn.model_selection import train_test_split
 from tensorflow.python.platform import gfile
+from pandas.io.json import json_normalize
+
+from MongoUtils import MongoUtils
+from Constants import Order
 
 def load_data():
-	return load_data_fft()
+	return load_data_mongo()
 	csv_data = pd.read_csv('data.csv', index_col = 0)
 	filenameList = csv_data.filename
 	csv_data = csv_data.drop(['filename'], axis = 1)
@@ -28,6 +33,17 @@ def load_data():
 	# scaler = StandardScaler()
 	scaler = MinMaxScaler()
 	total_X = scaler.fit_transform(np.array(csv_data, dtype = float))
+	return total_X, filenameList, 0.018
+
+def load_data_mongo():
+	order = deepcopy(Order)
+	order[0] = 'title'
+	mongo = MongoUtils()
+	mongo_data = json_normalize(mongo.findAllMusic())[order]
+	filenameList = mongo_data.title
+	mongo_data = mongo_data.drop(['title'], axis = 1)
+	scaler = MinMaxScaler()
+	total_X = scaler.fit_transform(np.array(mongo_data, dtype = float))
 	return total_X, filenameList, 0.018
 
 def load_data_android():
@@ -58,7 +74,7 @@ def train():
 	print(type(x_train))
 
 	learning_rate = 0.01
-	training_epochs = 50000
+	training_epochs = 5000
 	# batch_size = 64
 	display_step = 100
 	# examples_to_show = 10
@@ -184,7 +200,8 @@ def predict_data(total_X):
 	return result
 
 def test(idx):
-	ret, filenameList = predict_pb()
+	# ret, filenameList = predict_pb()
+	ret, filenameList, _ = load_data_mongo()
 	# ret, filenameList = predict()
 	print(filenameList[idx])
 	dev = ret[idx]
@@ -196,7 +213,7 @@ def test(idx):
 		dist2 = np.sqrt(np.sum(np.square(dev - devb)))
 		result.append((filenameList[count], dist2))
 		count += 1
-	result = sorted(result, key = lambda x: x[1])
+	result = sorted(result, key = lambda x: x[1])[0:100]
 	for k, v in enumerate(result):
 		print(k, *v)
 
@@ -310,10 +327,14 @@ def test_temp():
 		print(name)
 
 if __name__ == '__main__':
-	saveToSqlite()
+	# saveToSqlite()
 	# test_temp()
 	# train()
-	# test(823)
+	test(122)
+	print('=' * 100)
+	test(81)
+	print('=' * 100)
+	test(48)
 	# preview()
 	# freeze()
 	# load_data_android()
