@@ -5,6 +5,8 @@
 
 import os
 import json
+import librosa
+import sklearn
 from glob import glob
 import matplotlib.mlab as mlab
 from operator import itemgetter
@@ -168,16 +170,49 @@ def getOneMp3(filename):
 		# hashes = fingerprint(channel, Fs=fs)
 		# print(len(set(hashes)))
 
+# def getSampleData(filename, savename, retStr = False):
+# 	# print(idx, filename)
+# 	data = getOneMp3(filename)
+# 	data = data.T
+# 	ret = {'mid': savename}
+# 	for k, v in enumerate(data):
+# 		ret['mean_%s'%k] = float(np.mean(v))
+# 		ret['std_%s'%k] = float(np.std(v))
+# 		ret['max_%s'%k] = float(np.max(v))
+# 		ret['min_%s'%k] = float(np.min(v))
+# 	if retStr:
+# 		return json.dumps(ret)
+# 	return ret
+
 def getSampleData(filename, savename, retStr = False):
-	# print(idx, filename)
-	data = getOneMp3(filename)
-	data = data.T
+	from pydub import AudioSegment
+	audiofile = AudioSegment.from_file(filename)
+	start = int((audiofile.duration_seconds - SAMPLE_SECOND) / 2)
+
 	ret = {'mid': savename}
-	for k, v in enumerate(data):
-		ret['mean_%s'%k] = float(np.mean(v))
-		ret['std_%s'%k] = float(np.std(v))
-		ret['max_%s'%k] = float(np.max(v))
-		ret['min_%s'%k] = float(np.min(v))
+	y, sr = librosa.load(filename, mono=True, offset=start, duration=30)
+	onset_env = librosa.onset.onset_strength(y, sr=sr, hop_length=512, aggregate=np.median)
+	tempo, _ = librosa.beat.beat_track(onset_envelope=onset_env, sr=sr)
+	chroma_stft = librosa.feature.chroma_stft(y=y, sr=sr)
+	spec_cent = librosa.feature.spectral_centroid(y=y, sr=sr)
+	spec_bw = librosa.feature.spectral_bandwidth(y=y, sr=sr)
+	rolloff = librosa.feature.spectral_rolloff(y=y, sr=sr)
+	zcr = librosa.feature.zero_crossing_rate(y)
+	zc = librosa.zero_crossings(y, pad = False)
+	mfccs = librosa.feature.mfcc(y=y, sr=sr)
+	# mfccs = sklearn.preprocessing.scale(mfccs, axis=1)
+	ret['chroma_stft'] = float(np.mean(chroma_stft))
+	ret['spec_cent'] = float(np.mean(spec_cent))
+	ret['spec_bw'] = float(np.mean(spec_bw))
+	ret['rolloff'] = float(np.mean(rolloff))
+	ret['zcr'] = float(np.mean(zcr))
+	ret['zc'] = int(sum(zc))
+	ret['bpm'] = tempo
+	# print(mfccs.var(axis=1))
+	# ret['mfcc_mean'] = float(mfccs.mean(axis=1))
+	# ret['mfcc_var'] = float(mfccs.var(axis=1))
+	for k, v in enumerate(mfccs):
+		ret['mfcc_%s'%k] = float(np.mean(v))
 	if retStr:
 		return json.dumps(ret)
 	return ret
@@ -189,33 +224,35 @@ def audioToWav(filename):
 
 
 if __name__ == '__main__':
-	fileList = glob('music/*.mp3')
-	fileList.sort()
-	result = []
-	peakFiles = set()
-	if os.path.isfile('peak_data.json'):
-		f = open('peak_data.json', 'r')
-		for i in f:
-			ret = json.loads(i)
-			result.append(ret)
-			peakFiles.add(ret['filename'])
-		f.close()
-		f = open('peak_data.json', 'a+')
-	else:
-		f = open('peak_data.json', 'w')
-	for idx, filename in enumerate(fileList):
-		if os.path.basename(filename) in peakFiles:
-			continue
-		print(idx, filename)
-		audioToWav(filename)
-		ret = getSampleData('temp.wav', os.path.basename(filename))
-		f.write(json.dumps(ret) + '\r\n')
-		f.flush()
-		result.append(ret)
-	f.close()
-	if os.path.isfile('temp.wav'):
-		os.remove('temp.wav')
-	header = list(ret.keys())
-	print(header)
-	data = json_normalize(result)
-	data.to_csv('data_peak.csv', columns = header)
+	ret = getSampleData('/mnt/d/__git__/test.mp3', 'test', True)
+	print(ret)
+	# fileList = glob('music/*.mp3')
+	# fileList.sort()
+	# result = []
+	# peakFiles = set()
+	# if os.path.isfile('peak_data.json'):
+	# 	f = open('peak_data.json', 'r')
+	# 	for i in f:
+	# 		ret = json.loads(i)
+	# 		result.append(ret)
+	# 		peakFiles.add(ret['filename'])
+	# 	f.close()
+	# 	f = open('peak_data.json', 'a+')
+	# else:
+	# 	f = open('peak_data.json', 'w')
+	# for idx, filename in enumerate(fileList):
+	# 	if os.path.basename(filename) in peakFiles:
+	# 		continue
+	# 	print(idx, filename)
+	# 	audioToWav(filename)
+	# 	ret = getSampleData('temp.wav', os.path.basename(filename))
+	# 	f.write(json.dumps(ret) + '\r\n')
+	# 	f.flush()
+	# 	result.append(ret)
+	# f.close()
+	# if os.path.isfile('temp.wav'):
+	# 	os.remove('temp.wav')
+	# header = list(ret.keys())
+	# print(header)
+	# data = json_normalize(result)
+	# data.to_csv('data_peak.csv', columns = header)
