@@ -22,10 +22,12 @@ Order = [
     'mid',
     'chroma_stft',
     'spec_cent',
+    'spec_cent_pos',
     'spec_bw',
     'rolloff',
     'zcr',
     'zc',
+    'bpm',
     'mfcc_0',
     'mfcc_1',
     'mfcc_2',
@@ -46,5 +48,8 @@ Order = [
     'mfcc_17',
     'mfcc_18',
     'mfcc_19',
-    'bpm'
+
+    'mean_0', 'std_0', 'max_0', 'min_0',
+    'mean_1', 'std_1', 'max_1', 'min_1',
+    'mean_2', 'std_2', 'max_2', 'min_2'
 ]

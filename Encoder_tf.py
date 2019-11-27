@@ -334,7 +334,7 @@ if __name__ == '__main__':
 	print('=' * 100)
 	test(81)
 	print('=' * 100)
-	test(48)
+	test(39)
 	# preview()
 	# freeze()
 	# load_data_android()

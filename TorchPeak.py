@@ -41,7 +41,7 @@ FINGERPRINT_REDUCTION = 20
 
 NT_REDUCTION = 20
 
-SAMPLE_SECOND = 60
+SAMPLE_SECOND = 30
 
 
 def fingerprint(channel_samples, Fs=DEFAULT_FS,
@@ -141,7 +141,6 @@ def readFileWav(filename):
 def readFile(filename):
 	from pydub import AudioSegment
 	audiofile = AudioSegment.from_file(filename)
-	data = np.frombuffer(audiofile._data, np.int16)
 	start = int((audiofile.duration_seconds - SAMPLE_SECOND) / 2)
 	audiofile = audiofile[start * 1000:(start + SAMPLE_SECOND) * 1000]
 	data = np.frombuffer(audiofile._data, np.int16)
@@ -170,19 +169,17 @@ def getOneMp3(filename):
 		# hashes = fingerprint(channel, Fs=fs)
 		# print(len(set(hashes)))
 
-# def getSampleData(filename, savename, retStr = False):
-# 	# print(idx, filename)
-# 	data = getOneMp3(filename)
-# 	data = data.T
-# 	ret = {'mid': savename}
-# 	for k, v in enumerate(data):
-# 		ret['mean_%s'%k] = float(np.mean(v))
-# 		ret['std_%s'%k] = float(np.std(v))
-# 		ret['max_%s'%k] = float(np.max(v))
-# 		ret['min_%s'%k] = float(np.min(v))
-# 	if retStr:
-# 		return json.dumps(ret)
-# 	return ret
+def getSampleDataWave(filename):
+	# print(idx, filename)
+	data = getOneMp3(filename)
+	data = data.T
+	ret = {}
+	for k, v in enumerate(data):
+		ret['mean_%s'%k] = float(np.mean(v))
+		ret['std_%s'%k] = float(np.std(v))
+		ret['max_%s'%k] = float(np.max(v))
+		ret['min_%s'%k] = float(np.min(v))
+	return ret
 
 def getSampleData(filename, savename, retStr = False):
 	from pydub import AudioSegment
@@ -190,7 +187,7 @@ def getSampleData(filename, savename, retStr = False):
 	start = int((audiofile.duration_seconds - SAMPLE_SECOND) / 2)
 
 	ret = {'mid': savename}
-	y, sr = librosa.load(filename, mono=True, offset=start, duration=30)
+	y, sr = librosa.load(filename, mono=True, offset=start, duration=SAMPLE_SECOND)
 	onset_env = librosa.onset.onset_strength(y, sr=sr, hop_length=512, aggregate=np.median)
 	tempo, _ = librosa.beat.beat_track(onset_envelope=onset_env, sr=sr)
 	chroma_stft = librosa.feature.chroma_stft(y=y, sr=sr)
@@ -203,6 +200,7 @@ def getSampleData(filename, savename, retStr = False):
 	# mfccs = sklearn.preprocessing.scale(mfccs, axis=1)
 	ret['chroma_stft'] = float(np.mean(chroma_stft))
 	ret['spec_cent'] = float(np.mean(spec_cent))
+	ret['spec_cent_pos'] = getCenter(spec_cent)
 	ret['spec_bw'] = float(np.mean(spec_bw))
 	ret['rolloff'] = float(np.mean(rolloff))
 	ret['zcr'] = float(np.mean(zcr))
@@ -213,9 +211,18 @@ def getSampleData(filename, savename, retStr = False):
 	# ret['mfcc_var'] = float(mfccs.var(axis=1))
 	for k, v in enumerate(mfccs):
 		ret['mfcc_%s'%k] = float(np.mean(v))
+	ret.update(getSampleDataWave(filename))
 	if retStr:
 		return json.dumps(ret)
 	return ret
+
+def getCenter(spec_cent):
+	spec_cent = spec_cent.T
+	half = sum(spec_cent) / 2
+	for i in range(spec_cent.shape[0]):
+		num = sum(spec_cent[0:i])
+		if num >= half:
+			return float(i) / spec_cent.shape[0]
 
 def audioToWav(filename):
 	from pydub import AudioSegment
@@ -224,7 +231,9 @@ def audioToWav(filename):
 
 
 if __name__ == '__main__':
-	ret = getSampleData('/mnt/d/__git__/test.mp3', 'test', True)
+	ret = getSampleData('/mnt/d/__odyssey__/TorchEncoder/music/59910.mp3', 'test', True)
+	print(ret)
+	ret = getSampleData('/mnt/d/__odyssey__/TorchEncoder/music/64093.mp3', 'test', True)
 	print(ret)
 	# fileList = glob('music/*.mp3')
 	# fileList.sort()
