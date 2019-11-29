@@ -44,7 +44,7 @@ def load_data_mongo():
 	mongo_data = mongo_data.drop(['title'], axis = 1)
 	scaler = MinMaxScaler()
 	total_X = scaler.fit_transform(np.array(mongo_data, dtype = float))
-	return total_X, filenameList, 0.018
+	return total_X, filenameList, 0.01
 
 def load_data_android():
 	content = json.load(open('data.json', 'r'))
@@ -201,8 +201,8 @@ def predict_data(total_X):
 
 def test(idx):
 	# ret, filenameList = predict_pb()
-	ret, filenameList, _ = load_data_mongo()
-	# ret, filenameList = predict()
+	# ret, filenameList, _ = load_data_mongo()
+	ret, filenameList = predict()
 	print(filenameList[idx])
 	dev = ret[idx]
 	result = []

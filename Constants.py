@@ -49,7 +49,7 @@ Order = [
     'mfcc_18',
     'mfcc_19',
 
-    'mean_0', 'std_0', 'max_0', 'min_0',
-    'mean_1', 'std_1', 'max_1', 'min_1',
-    'mean_2', 'std_2', 'max_2', 'min_2'
+    # 'mean_0', 'std_0', 'max_0', 'min_0',
+    # 'mean_1', 'std_1', 'max_1', 'min_1',
+    # 'mean_2', 'std_2', 'max_2', 'min_2'
 ]
