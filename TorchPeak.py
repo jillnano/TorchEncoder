@@ -182,12 +182,14 @@ def getSampleDataWave(filename):
 	return ret
 
 def getSampleData(filename, savename, retStr = False):
-	from pydub import AudioSegment
-	audiofile = AudioSegment.from_file(filename)
-	start = int((audiofile.duration_seconds - SAMPLE_SECOND) / 2)
+	# from pydub import AudioSegment
+	# audiofile = AudioSegment.from_file(filename)
+	# start = int((audiofile.duration_seconds - SAMPLE_SECOND) / 2)
 
 	ret = {'mid': savename}
-	y, sr = librosa.load(filename, mono=True, offset=start, duration=SAMPLE_SECOND)
+	# y, sr = librosa.load(filename, mono=True, offset=start, duration=SAMPLE_SECOND)
+	y, sr = librosa.load(filename, mono=True, duration=SAMPLE_SECOND)
+	# y, sr = librosa.load(filename, mono=True, sr = 16000)
 	onset_env = librosa.onset.onset_strength(y, sr=sr, hop_length=512, aggregate=np.median)
 	tempo, _ = librosa.beat.beat_track(onset_envelope=onset_env, sr=sr)
 	chroma_stft = librosa.feature.chroma_stft(y=y, sr=sr)
