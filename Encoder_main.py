@@ -34,18 +34,18 @@ if __name__ == '__main__':
 			sample = {}
 			for k in Order:
 				sample[k] = d[k]
-	# 	sampleList.append(sample)
-	# sample_data = json_normalize(sampleList)[Order]
-	# filenameList = sample_data.mid
-	# sample_data = sample_data.drop(['mid'], axis = 1)
-	# scaler = MinMaxScaler()
-	# total_X = scaler.fit_transform(np.array(sample_data, dtype = float))
-	# result = predict_data(total_X)
-	# # result_data = []
-	# for idx, fn in enumerate(filename):
-	# 	print('encode:', idx, fn['mid'])
-	# 	encode_data = {'encode_1': int(result[idx][0] * 255), 'encode_2': int(result[idx][1] * 255)}
-	# 	mongo.updateMusic(fn['mid'], encode_data)
+		sampleList.append(sample)
+	sample_data = json_normalize(sampleList)[Order]
+	filenameList = sample_data.mid
+	sample_data = sample_data.drop(['mid'], axis = 1)
+	scaler = MinMaxScaler()
+	total_X = scaler.fit_transform(np.array(sample_data, dtype = float))
+	result = predict_data(total_X)
+	# result_data = []
+	for idx, fn in enumerate(filename):
+		print('encode:', idx, fn['mid'])
+		encode_data = {'encode_1': int(result[idx][0] * 255), 'encode_2': int(result[idx][1] * 255)}
+		mongo.updateMusic(fn['mid'], encode_data)
 
 	# 	result_data.append(fn)
 	# print(json.dumps(result_data))
